@@ -32,6 +32,11 @@ async def on_message(message: discord.Message):
         state.messages.append(RecordedMessage(message, time.time()))
 
 
+@bot.slash_command(name="help")
+async def help(ctx: discord.ApplicationContext):
+    await ctx.respond(lang(cache, ctx.guild.id).entry("help"))
+
+
 @bot.slash_command(name="language")
 @discord.option("id")
 async def set_language(ctx: discord.ApplicationContext, id: str):

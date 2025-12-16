@@ -1,4 +1,5 @@
 {
+    "help": "**Hi! I'm Ignácio!** I'm a master in advanced call recording. As well as recording each person's voice individually, I also record messages sent in marked channels, including images and audio.\n\n**Commands:**\n- `/help`:  Shows this guide.\n- `/language`:  Changes the language which I'll use.\n- `/record`:  Starts a recording. **Note:** you have to be in a voice call for this.\n- `/finish`:  Finishes a recording.\n- `/watch`:  Marks a channel for message recording.\n- `/unwatch`: Unmarks a channel for message recording.\n- `/reset`: Deletes all data about this server.",
     "language.set": "I will now speak in **English**.",
     "recording.start": "Recording started.",
     "recording.start.error.no_target": "You are not in a voice channel.",
