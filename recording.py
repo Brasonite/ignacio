@@ -47,7 +47,10 @@ class RecordingFile:
             "CREATE TABLE audio (user INTEGER NOT NULL PRIMARY KEY, mime TINYTEXT NOT NULL, data MEDIUMBLOB NOT NULL)"
         )
         file.execute(
-            "CREATE TABLE messages (offset FLOAT NOT NULL, user INTEGER NOT NULL, text TEXT, attachments TEXT)"
+            "CREATE TABLE channels (id INTEGER NOT NULL PRIMARY KEY, name TINYTEXT NOT NULL)"
+        )
+        file.execute(
+            "CREATE TABLE messages (offset FLOAT NOT NULL, user INTEGER NOT NULL, channel INTEGER NOT NULL, text TEXT, attachments TEXT)"
         )
         file.execute(
             "CREATE TABLE attachments (id TEXT NOT NULL PRIMARY KEY, mime TINYTEXT, data MEDIUMBLOB NOT NULL)"
@@ -76,6 +79,9 @@ class RecordingFile:
             )
 
         for message in state.messages:
+            if isinstance(message.message.channel, discord.TextChannel):
+                util.store_channel(file, message.message.channel)
+
             util.store_user(file, message.message.author)
 
             attachments = ""
@@ -92,10 +98,11 @@ class RecordingFile:
                 )
 
             file.execute(
-                "INSERT INTO messages VALUES (?, ?, ?, ?)",
+                "INSERT INTO messages VALUES (?, ?, ?, ?, ?)",
                 [
                     message.timestamp - state.start,
                     message.message.author.id,
+                    message.message.channel.id,
                     message.message.content,
                     attachments,
                 ],
