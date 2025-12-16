@@ -32,12 +32,12 @@ async def on_message(message: discord.Message):
         state.messages.append(RecordedMessage(message, time.time()))
 
 
-@bot.slash_command(name="help")
+@bot.slash_command(name="help", description="Shows the bot's guide.")
 async def help(ctx: discord.ApplicationContext):
     await ctx.respond(lang(cache, ctx.guild.id).entry("help"))
 
 
-@bot.slash_command(name="language")
+@bot.slash_command(name="language", description="Sets the bot's spoken language.")
 @discord.option("id")
 async def set_language(ctx: discord.ApplicationContext, id: str):
     data.setup_guild_cache(cache, ctx.guild.id)
@@ -49,7 +49,7 @@ async def set_language(ctx: discord.ApplicationContext, id: str):
     await ctx.respond(lang(cache, ctx.guild.id).entry("language.set"))
 
 
-@bot.slash_command(name="reset")
+@bot.slash_command(name="reset", description="Deletes all data about this server.")
 async def reset(ctx: discord.ApplicationContext):
     await ctx.defer()
 
@@ -67,7 +67,7 @@ async def reset(ctx: discord.ApplicationContext):
     await ctx.respond(lang(cache, ctx.guild.id).entry("reset"))
 
 
-@bot.slash_command(name="record")
+@bot.slash_command(name="record", description="Starts a recording.")
 async def record(ctx: discord.ApplicationContext):
     await ctx.defer()
 
@@ -100,7 +100,7 @@ async def record(ctx: discord.ApplicationContext):
     await ctx.respond(lang(cache, ctx.guild.id).entry("recording.start"))
 
 
-@bot.slash_command(name="finish")
+@bot.slash_command(name="finish", description="Finishes a recording.")
 async def finish(ctx: discord.ApplicationContext):
     if ctx.guild.id in recordings:
         state = recordings.pop(ctx.guild.id)
@@ -113,7 +113,7 @@ async def finish(ctx: discord.ApplicationContext):
         )
 
 
-@bot.slash_command(name="watch")
+@bot.slash_command(name="watch", description="Marks a channel for message recording.")
 async def watch(ctx: discord.ApplicationContext):
     if is_channel_tracked(ctx.channel.id):
         await ctx.respond(
@@ -133,7 +133,9 @@ async def watch(ctx: discord.ApplicationContext):
     )
 
 
-@bot.slash_command(name="unwatch")
+@bot.slash_command(
+    name="unwatch", description="Unmarks a channel for message recording."
+)
 async def unwatch(ctx: discord.ApplicationContext):
     if not is_channel_tracked(ctx.channel.id):
         await ctx.respond(
