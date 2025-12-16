@@ -1,0 +1,12 @@
+{
+    "language.set": "I will now speak in **English**.",
+    "recording.start": "Recording started.",
+    "recording.start.error.no_target": "You are not in a voice channel.",
+    "recording.start.error.invalid_target": "I can't record this type of channel.",
+    "recording.finish": "Recording saved.",
+    "recording.finish.error.no_recording": "I'm not currently recording anything.",
+    "watch": "The channel **{channel}** will be recorded.",
+    "watch.error.superfluous": "The channel **{channel}** would already be recorded.",
+    "unwatch": "The cannel **{channel}** will no longer be recorded.",
+    "unwatch.error.superfluous": "The channel **{channel}** would already not be recorded."
+}

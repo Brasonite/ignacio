@@ -3,6 +3,7 @@ from recording import RecordingState, RecordingFile, RecordedMessage
 import time
 from audio import TimestampedMP3Sink
 import discord
+from lang import lang
 import os
 import sqlite3
 from dotenv import load_dotenv
@@ -31,6 +32,18 @@ async def on_message(message: discord.Message):
         state.messages.append(RecordedMessage(message, time.time()))
 
 
+@bot.slash_command(name="language")
+@discord.option("id")
+async def set_language(ctx: discord.ApplicationContext, id: str):
+    data.setup_guild_cache(cache, ctx.guild.id)
+
+    cache.execute(
+        "UPDATE settings SET language=(?) WHERE guild=(?)", [id, ctx.guild.id]
+    )
+
+    await ctx.respond(lang(cache, ctx.guild.id).entry("language.set"))
+
+
 @bot.slash_command(name="record")
 async def record(ctx: discord.ApplicationContext):
     await ctx.defer()
@@ -38,11 +51,15 @@ async def record(ctx: discord.ApplicationContext):
     voice = ctx.author.voice
 
     if voice is None:
-        await ctx.respond("You are not in a voice channel.")
+        await ctx.respond(
+            lang(cache, ctx.guild.id).entry("recording.start.error.no_target")
+        )
         return
 
     if not isinstance(voice.channel, discord.VoiceChannel):
-        await ctx.respond("The channel you're in is not a voice channel.")
+        await ctx.respond(
+            lang(cache, ctx.guild.id).entry("recording.start.error.invalid_target")
+        )
         return
 
     vc = await voice.channel.connect()
@@ -57,7 +74,7 @@ async def record(ctx: discord.ApplicationContext):
         sync_start=True,
     )
 
-    await ctx.respond("Recording started.")
+    await ctx.respond(lang(cache, ctx.guild.id).entry("recording.start"))
 
 
 @bot.slash_command(name="finish")
@@ -68,13 +85,19 @@ async def finish(ctx: discord.ApplicationContext):
 
         await ctx.delete()
     else:
-        await ctx.respond("I am currently not recording here.")
+        await ctx.respond(
+            lang(cache, ctx.guild.id).entry("recording.finish.error.no_recording")
+        )
 
 
 @bot.slash_command(name="watch")
 async def watch(ctx: discord.ApplicationContext):
     if is_channel_tracked(ctx.channel.id):
-        await ctx.respond(f"Channel **{ctx.channel.name}** is already being tracked.")
+        await ctx.respond(
+            lang(cache, ctx.guild.id)
+            .entry("watch.error.superfluous")
+            .format(channel=ctx.channel.name)
+        )
         return
 
     cache.execute(
@@ -82,20 +105,26 @@ async def watch(ctx: discord.ApplicationContext):
         [ctx.channel.id, ctx.guild.id],
     )
 
-    await ctx.respond(f"Tracking channel **{ctx.channel.name}**")
+    await ctx.respond(
+        lang(cache, ctx.guild.id).entry("watch").format(channel=ctx.channel.name)
+    )
 
 
 @bot.slash_command(name="unwatch")
 async def unwatch(ctx: discord.ApplicationContext):
     if not is_channel_tracked(ctx.channel.id):
         await ctx.respond(
-            f"Channel **{ctx.channel.name}** is already not being tracked."
+            lang(cache, ctx.guild.id)
+            .entry("unwatch.error.superfluous")
+            .format(channel=ctx.channel.name)
         )
         return
 
     cache.execute("DELETE FROM tracked WHERE id=(?)", [ctx.channel.id])
 
-    await ctx.respond(f"Untracking channel **{ctx.channel.name}**")
+    await ctx.respond(
+        lang(cache, ctx.guild.id).entry("unwatch").format(channel=ctx.channel.name)
+    )
 
 
 async def save_recording(sink: TimestampedMP3Sink, state: RecordingState):
@@ -103,7 +132,7 @@ async def save_recording(sink: TimestampedMP3Sink, state: RecordingState):
 
     _ = RecordingFile(sink, state)
 
-    await state.origin.send(f"Finished recording.")
+    await state.origin.send(lang(cache, state.origin.guild).entry("recording.finish"))
 
 
 def is_channel_tracked(id: int) -> bool:
@@ -115,7 +144,10 @@ def is_channel_tracked(id: int) -> bool:
 
 def setup_cache():
     cache.execute(
-        "CREATE TABLE IF NOT EXISTS tracked(id INTEGER NOT NULL PRIMARY KEY, guild INTEGER)"
+        "CREATE TABLE IF NOT EXISTS settings (guild INTEGER NOT NULL PRIMARY KEY, language TINYTEXT)"
+    )
+    cache.execute(
+        "CREATE TABLE IF NOT EXISTS tracked (id INTEGER NOT NULL PRIMARY KEY, guild INTEGER)"
     )
 
 
