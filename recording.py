@@ -61,7 +61,12 @@ class RecordingFile:
             "CREATE TABLE attachments (id TEXT NOT NULL PRIMARY KEY, mime TINYTEXT, data MEDIUMBLOB NOT NULL)"
         )
 
-        file.execute("INSERT INTO metadata VALUES (1, ?)", [sink.start])
+        if sink.start is not None and state.start is not None:
+            file.execute(
+                "INSERT INTO metadata VALUES (1, ?)", [sink.start - state.start]
+            )
+        else:
+            file.execute("INSERT INTO metadata VALUES (1, 0)")
 
         for user_id, audio in sink.audio_data.items():
             member: discord.Member = state.origin.guild.get_member(user_id)
