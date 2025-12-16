@@ -3,7 +3,7 @@ import time
 
 
 class TimestampedMP3Sink(MP3Sink):
-    def __init(self, *, filters=None):
+    def __init__(self, *, filters=None):
         super().__init__(filters=filters)
 
         self.start = None
