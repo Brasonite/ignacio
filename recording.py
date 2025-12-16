@@ -18,7 +18,8 @@ class RecordedMessage:
 
 
 class RecordingState:
-    def __init__(self, vc, origin, start: float):
+    def __init__(self, guild: int, vc, origin, start: float):
+        self.guild = guild
         self.vc = vc
         self.origin = origin
         self.start = start
@@ -28,7 +29,7 @@ class RecordingState:
 class RecordingFile:
     def __init__(self, sink: TimestampedMP3Sink, state: RecordingState):
         dt = datetime.datetime.fromtimestamp(state.start)
-        filename = f"{dt.year}-{dt.month}-{dt.day}_{dt.hour}-{dt.minute}-{dt.second}.db"
+        filename = f"{state.guild}_{dt.year}-{dt.month}-{dt.day}_{dt.hour}-{dt.minute}-{dt.second}.db"
         filepath = f"{data.RECORDING_DIR}/{filename}"
 
         if os.path.exists(filepath):
@@ -38,7 +39,7 @@ class RecordingFile:
         file = file_connection.cursor()
 
         file.execute(
-            "CREATE TABLE metadata (id INTEGER PRIMARY KEY CHECK (id = 1), audio_start FLOAT)"
+            "CREATE TABLE metadata (id INTEGER PRIMARY KEY CHECK (id = 1), guild INTEGER NOT NULL, audio_start FLOAT)"
         )
         file.execute(
             "CREATE TABLE users (id INTEGER NOT NULL PRIMARY KEY, name TINYTEXT NOT NULL, display_name TINYTEXT NOT NULL, avatar MEDIUMBLOB NOT NULL, avatar_type TINYTEXT)"
@@ -58,10 +59,11 @@ class RecordingFile:
 
         if sink.start is not None and state.start is not None:
             file.execute(
-                "INSERT INTO metadata VALUES (1, ?)", [sink.start - state.start]
+                "INSERT INTO metadata VALUES (1, ?, ?)",
+                [state.guild, sink.start - state.start],
             )
         else:
-            file.execute("INSERT INTO metadata VALUES (1, 0)")
+            file.execute("INSERT INTO metadata VALUES (1, ?, 0)", [state.guild])
 
         for user_id, audio in sink.audio_data.items():
             member: discord.Member = state.origin.guild.get_member(user_id)

@@ -69,7 +69,7 @@ async def record(ctx: discord.ApplicationContext):
 
     vc = await voice.channel.connect()
 
-    state = RecordingState(vc, ctx.channel, time.time())
+    state = RecordingState(ctx.guild.id, vc, ctx.channel, time.time())
     recordings.update({ctx.guild.id: state})
 
     vc.start_recording(
