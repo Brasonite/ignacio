@@ -5,6 +5,7 @@
     "recording.start": "Recording started.",
     "recording.start.error.no_target": "You are not in a voice channel.",
     "recording.start.error.invalid_target": "I can't record this type of channel.",
+    "recording.start.error.duplicate": "I'm already recording in this server.",
     "recording.finish": "Recording saved.",
     "recording.finish.error.no_recording": "I'm not currently recording anything.",
     "watch": "The channel **{channel}** will be recorded.",

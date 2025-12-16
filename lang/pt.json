@@ -5,6 +5,7 @@
     "recording.start": "Gravação iniciada.",
     "recording.start.error.no_target": "Você não está em um canal de voz.",
     "recording.start.error.invalid_target": "Não consigo gravar esse tipo de canal.",
+    "recording.start.error.duplicate": "Já estou gravando nesse servidor.",
     "recording.finish": "Gravação salva.",
     "recording.finish.error.no_recording": "Não estou gravando nada nesse momento.",
     "watch": "O canal **{channel}** será gravado.",

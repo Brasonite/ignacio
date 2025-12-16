@@ -69,6 +69,12 @@ async def reset(ctx: discord.ApplicationContext):
 
 @bot.slash_command(name="record", description="Starts a recording.")
 async def record(ctx: discord.ApplicationContext):
+    if ctx.guild.id in recordings:
+        await ctx.respond(
+            lang(cache, ctx.guild.id).entry("recording.start.error.duplicate")
+        )
+        return
+
     await ctx.defer()
 
     voice = ctx.author.voice
