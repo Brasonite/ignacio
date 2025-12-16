@@ -49,6 +49,24 @@ async def set_language(ctx: discord.ApplicationContext, id: str):
     await ctx.respond(lang(cache, ctx.guild.id).entry("language.set"))
 
 
+@bot.slash_command(name="reset")
+async def reset(ctx: discord.ApplicationContext):
+    await ctx.defer()
+
+    cache.execute("DELETE FROM settings WHERE guild=(?)", [ctx.guild.id])
+    cache.execute("DELETE FROM tracked WHERE guild=(?)", [ctx.guild.id])
+
+    guild_id = str(ctx.guild.id)
+
+    for file in os.listdir(data.RECORDING_DIR):
+        filename = os.fsdecode(file)
+
+        if filename.startswith(guild_id):
+            os.remove(f"{data.RECORDING_DIR}/{filename}")
+
+    await ctx.respond(lang(cache, ctx.guild.id).entry("reset"))
+
+
 @bot.slash_command(name="record")
 async def record(ctx: discord.ApplicationContext):
     await ctx.defer()
@@ -137,7 +155,9 @@ async def save_recording(sink: TimestampedMP3Sink, state: RecordingState):
 
     _ = RecordingFile(sink, state)
 
-    await state.origin.send(lang(cache, state.origin.guild).entry("recording.finish"))
+    await state.origin.send(
+        lang(cache, state.origin.guild.id).entry("recording.finish")
+    )
 
 
 def is_channel_tracked(id: int) -> bool:

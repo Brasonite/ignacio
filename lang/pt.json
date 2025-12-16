@@ -1,6 +1,7 @@
 {
     "help": "**Olá! Eu sou o Ignácio!** Eu sou um mestre em gravação avançada de conversas. Além de gravar a voz de cada pessoa individualmente, também gravo mensagens enviadas em canais marcados, inclusive imagens e áudio.\n\n**Comandos:**\n- `/help`:  Mostra esse guia.\n- `/language`:  Muda a língua na qual falarei.\n- `/record`:  Começa uma gravação. **Nota:** você tem que estar em um canal de voz para isso.\n- `/finish`:  Termina a gravação atual.\n- `/watch`:  Marca um canal para ter suas mensagens gravadas.\n- `/unwatch`:  Desmarca um canal para ter suas mensagens gravadas.\n- `/reset`: Apaga todos os dados salvos sobre esse servidor.",
     "language.set": "Agora falarei em **Português**.",
+    "reset": "Todos os dados foram apagados.",
     "recording.start": "Gravação iniciada.",
     "recording.start.error.no_target": "Você não está em um canal de voz.",
     "recording.start.error.invalid_target": "Não consigo gravar esse tipo de canal.",
