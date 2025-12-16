@@ -1,7 +1,7 @@
 import data
 from recording import RecordingState, RecordingFile, RecordedMessage
 import time
-from audio import TimestampedWaveSink
+from audio import TimestampedMP3Sink
 import discord
 import os
 import sqlite3
@@ -51,7 +51,7 @@ async def record(ctx: discord.ApplicationContext):
     recordings.update({ctx.guild.id: state})
 
     vc.start_recording(
-        TimestampedWaveSink(),
+        TimestampedMP3Sink(),
         save_recording,
         state,
         sync_start=True,
@@ -98,7 +98,7 @@ async def unwatch(ctx: discord.ApplicationContext):
     await ctx.respond(f"Untracking channel **{ctx.channel.name}**")
 
 
-async def save_recording(sink: TimestampedWaveSink, state: RecordingState):
+async def save_recording(sink: TimestampedMP3Sink, state: RecordingState):
     await sink.vc.disconnect()
 
     _ = RecordingFile(sink, state)

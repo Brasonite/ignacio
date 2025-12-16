@@ -1,22 +1,14 @@
-import util
-import requests
-from uuid import uuid4
-
-from io import BytesIO
-
-from discord.sinks import AudioData
-
-from audio import TimestampedWaveSink
-
+from audio import TimestampedMP3Sink
 import data
-
 import datetime
-
 import discord
-
+from discord.sinks import AudioData
+from io import BytesIO
 import os
-
+import requests
 import sqlite3
+import util
+from uuid import uuid4
 
 
 class RecordedMessage:
@@ -34,7 +26,7 @@ class RecordingState:
 
 
 class RecordingFile:
-    def __init__(self, sink: TimestampedWaveSink, state: RecordingState):
+    def __init__(self, sink: TimestampedMP3Sink, state: RecordingState):
         dt = datetime.datetime.fromtimestamp(state.start)
         filename = f"{dt.year}-{dt.month}-{dt.day}_{dt.hour}-{dt.minute}-{dt.second}.db"
         filepath = f"{data.RECORDING_DIR}/{filename}"
