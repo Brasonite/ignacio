@@ -1,5 +1,11 @@
 import data
-from recording import RecordingState, RecordingFile, RecordedMessage
+from recording import (
+    RecordingState,
+    RecordingFile,
+    RecordedMessage,
+    RecordedChannelEvent,
+    ChannelEventType,
+)
 import time
 from audio import TimestampedMP3Sink
 import discord
@@ -30,6 +36,26 @@ async def on_message(message: discord.Message):
     state: RecordingState | None = recordings.get(message.guild.id)
     if state is not None:
         state.messages.append(RecordedMessage(message, time.time()))
+
+
+@bot.event
+async def on_voice_state_update(
+    member: discord.Member, before: discord.VoiceState, after: discord.VoiceState
+):
+    state: RecordingState | None = recordings.get(member.guild.id)
+    if state is not None:
+        if before.channel is None and after.channel is not None:
+            if after.channel.id == state.vc.channel.id:
+                # User joined the recorded channel
+                state.events.append(
+                    RecordedChannelEvent(ChannelEventType.JOIN, member.id, time.time())
+                )
+        elif before.channel is not None and after.channel is None:
+            if before.channel.id == state.vc.channel.id:
+                # User left the recorded channel
+                state.events.append(
+                    RecordedChannelEvent(ChannelEventType.LEAVE, member.id, time.time())
+                )
 
 
 @bot.slash_command(name="help", description="Shows the bot's guide.")
@@ -159,6 +185,8 @@ async def unwatch(ctx: discord.ApplicationContext):
 
 
 async def save_recording(sink: TimestampedMP3Sink, state: RecordingState):
+    state.add_disconnect_events()
+
     await sink.vc.disconnect()
 
     _ = RecordingFile(sink, state)

@@ -1,14 +1,28 @@
+import time
 from audio import TimestampedMP3Sink
 import data
 import datetime
 import discord
 from discord.sinks import AudioData
+from enum import Enum
 from io import BytesIO
 import os
 import requests
 import sqlite3
 import util
 from uuid import uuid4
+
+
+class ChannelEventType(Enum):
+    JOIN = 0
+    LEAVE = 1
+
+
+class RecordedChannelEvent:
+    def __init__(self, type: ChannelEventType, user: int, timestamp: float):
+        self.type = type
+        self.user = user
+        self.timestamp = timestamp
 
 
 class RecordedMessage:
@@ -23,7 +37,22 @@ class RecordingState:
         self.vc = vc
         self.origin = origin
         self.start = start
+
         self.messages: list[RecordedMessage] = []
+        self.events: list[RecordedChannelEvent] = []
+
+        for member in vc.channel.members:
+            self.events.append(
+                RecordedChannelEvent(ChannelEventType.JOIN, member.id, start)
+            )
+
+    def add_disconnect_events(self):
+        now = time.time()
+
+        for member in self.vc.channel.members:
+            self.events.append(
+                RecordedChannelEvent(ChannelEventType.LEAVE, member.id, now)
+            )
 
 
 class RecordingFile:
@@ -46,6 +75,9 @@ class RecordingFile:
         )
         file.execute(
             "CREATE TABLE audio (user INTEGER NOT NULL PRIMARY KEY, mime TINYTEXT NOT NULL, data MEDIUMBLOB NOT NULL)"
+        )
+        file.execute(
+            "CREATE TABLE events (offset FLOAT NOT NULL, user INTEGER NOT NULL, type INTEGER NOT NULL)"
         )
         file.execute(
             "CREATE TABLE channels (id INTEGER NOT NULL PRIMARY KEY, name TINYTEXT NOT NULL)"
@@ -78,6 +110,12 @@ class RecordingFile:
             file.execute(
                 "INSERT INTO audio VALUES (?, ?, ?)",
                 [user_id, "audio/mpeg", audio.file.read()],
+            )
+
+        for event in state.events:
+            file.execute(
+                "INSERT INTO events VALUES (?, ?, ?)",
+                [event.timestamp - state.start, event.user, int(event.type.value)],
             )
 
         for message in state.messages:
