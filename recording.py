@@ -44,7 +44,7 @@ class RecordingFile:
             "CREATE TABLE users (id INTEGER NOT NULL PRIMARY KEY, name TINYTEXT NOT NULL, display_name TINYTEXT NOT NULL, avatar MEDIUMBLOB NOT NULL, avatar_type TINYTEXT)"
         )
         file.execute(
-            "CREATE TABLE audio (user INTEGER NOT NULL PRIMARY KEY, data MEDIUMBLOB)"
+            "CREATE TABLE audio (user INTEGER NOT NULL PRIMARY KEY, mime TINYTEXT NOT NULL, data MEDIUMBLOB NOT NULL)"
         )
         file.execute(
             "CREATE TABLE messages (offset FLOAT NOT NULL, user INTEGER NOT NULL, text TEXT, attachments TEXT)"
@@ -71,7 +71,8 @@ class RecordingFile:
                 continue
 
             file.execute(
-                "INSERT INTO audio VALUES (?, ?)", [user_id, audio.file.read()]
+                "INSERT INTO audio VALUES (?, ?, ?)",
+                [user_id, "audio/mpeg", audio.file.read()],
             )
 
         for message in state.messages:
