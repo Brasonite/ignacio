@@ -204,12 +204,10 @@ def is_channel_tracked(id: int) -> bool:
 
 
 def setup_cache():
-    cache.execute(
-        "CREATE TABLE IF NOT EXISTS settings (guild INTEGER NOT NULL PRIMARY KEY, language TINYTEXT)"
-    )
-    cache.execute(
-        "CREATE TABLE IF NOT EXISTS tracked (id INTEGER NOT NULL PRIMARY KEY, guild INTEGER)"
-    )
+    with open("./schemas/cache.sql") as f:
+        sql_script = f.read()
+
+    cache.executescript(sql_script)
 
 
 def main():

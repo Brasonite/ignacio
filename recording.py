@@ -56,6 +56,8 @@ class RecordingState:
 
 
 class RecordingFile:
+    SCHEMA_PATH = "./schemas/recording.sql"
+
     def __init__(self, sink: TimestampedMP3Sink, state: RecordingState):
         now = time.time()
 
@@ -69,27 +71,10 @@ class RecordingFile:
         file_connection = sqlite3.connect(f"{data.RECORDING_DIR}/{filename}")
         file = file_connection.cursor()
 
-        file.execute(
-            "CREATE TABLE metadata (id INTEGER PRIMARY KEY CHECK (id = 1), guild INTEGER NOT NULL, length FLOAT, audio_start FLOAT)"
-        )
-        file.execute(
-            "CREATE TABLE users (id INTEGER NOT NULL PRIMARY KEY, name TINYTEXT NOT NULL, display_name TINYTEXT NOT NULL, avatar MEDIUMBLOB NOT NULL, avatar_type TINYTEXT)"
-        )
-        file.execute(
-            "CREATE TABLE audio (user INTEGER NOT NULL PRIMARY KEY, mime TINYTEXT NOT NULL, data MEDIUMBLOB NOT NULL)"
-        )
-        file.execute(
-            "CREATE TABLE events (offset FLOAT NOT NULL, user INTEGER NOT NULL, type INTEGER NOT NULL)"
-        )
-        file.execute(
-            "CREATE TABLE channels (id INTEGER NOT NULL PRIMARY KEY, name TINYTEXT NOT NULL)"
-        )
-        file.execute(
-            "CREATE TABLE messages (offset FLOAT NOT NULL, user INTEGER NOT NULL, channel INTEGER NOT NULL, text TEXT, attachments TEXT)"
-        )
-        file.execute(
-            "CREATE TABLE attachments (id TEXT NOT NULL PRIMARY KEY, mime TINYTEXT, data MEDIUMBLOB NOT NULL)"
-        )
+        with open(self.SCHEMA_PATH, "r") as f:
+            sql_script = f.read()
+
+        file.executescript(sql_script)
 
         if sink.start is not None and state.start is not None:
             file.execute(
